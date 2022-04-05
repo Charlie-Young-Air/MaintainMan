@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { View } from '@tarojs/components'
-import { AtAccordion, AtList, AtListItem } from 'taro-ui'
+import { AtAccordion, AtList, AtListItem,AtTag } from 'taro-ui'
 import TAGList from '../../components/TAG/TAGList'
 import './index.scss'
 
@@ -8,7 +8,7 @@ export default class OrderItem extends Component {
 	state = {
 		isOpen: false,
 		note: '点击展开',
-		tagArr:[]
+		tagArr: []
 	}
 
 	handleClick = () => {
@@ -55,7 +55,7 @@ export default class OrderItem extends Component {
 						</AtAccordion>
 					</View>
 					<View className='at-col'>
-
+						
 					</View>
 				</View>
 

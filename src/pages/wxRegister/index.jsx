@@ -66,6 +66,18 @@ export default class Index extends Component {
 						this.setState({ openToast: true })
 						//存储token
 						Taro.setStorageSync('token', registerRes.data)
+						//设置定时器，每20s刷新一次token
+						const timer = setInterval(() => {
+							service.ticket().then(res => {
+								Taro.setStorageSync('token', res.data)
+							})
+						}, 1200000)
+						Taro.setStorageSync('timer', timer)
+						//获取用户身份，判断普通用户与工程师
+						service.getUserInfo().then(userInfo => {
+							if (userInfo.code === 200)
+								Taro.setStorageSync('role', userInfo.data.user_role)
+						})
 						//页面跳转
 						setTimeout(() => {
 							Taro.switchTab({ url: `/pages/order/index` })

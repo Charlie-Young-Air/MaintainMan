@@ -25,6 +25,7 @@ export default class Index extends Component {
     }
     service.getCurOrder(data).then(res => {
       if (res.code === 200 && res.data) {
+        console.log(res.data)
         this.setState({ orderArr: res.data })
       }
     })

@@ -20,6 +20,7 @@ export default class Index extends Component {
     if (token) {
       service.getUserInfo().then(userInfo => {
         if (userInfo.code === 200) {
+          console.log(userInfo)
           this.setState({
             nickName: userInfo.data.display_name,
             role: userInfo.data.role.display_name,
@@ -59,6 +60,12 @@ export default class Index extends Component {
           service.wxLogin(res.code).then(loginRes => {
             if (loginRes.code === 200) {
               Taro.setStorageSync('token', loginRes.data)
+              const timer = setInterval(() => {
+                service.ticket().then(res => {
+                  Taro.setStorageSync('token', res.data)
+                })
+              }, 1200000)
+              Taro.setStorageSync('timer', timer)
               //请求用户信息
               service.getUserInfo().then(userInfo => {
                 if (userInfo.code === 200) {
@@ -67,6 +74,7 @@ export default class Index extends Component {
                     role: userInfo.data.role.display_name,
                     isLogin: true
                   })
+                  Taro.setStorageSync('role',userInfo.data.user_role)
                   Taro.showTabBar({ animation: true })
                   PubSub.publish('Login', { isLogin: true })
                 }
@@ -91,7 +99,7 @@ export default class Index extends Component {
       Taro.clearStorageSync()
       this.setState({ nickName: '', role: '游客模式', isLogin: false })
       //通知主界面，当前已经处于退出状态
-      PubSub.publish('Login', { isLogin: false})
+      PubSub.publish('Login', { isLogin: false })
       //隐藏tabbar
       Taro.hideTabBar()
     }
