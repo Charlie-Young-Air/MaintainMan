@@ -6,7 +6,7 @@ import './index.scss'
 export default class OrderList extends Component {
 
 	render() {
-		const { orderArr } = this.props
+		const { orderArr, role } = this.props
 		return (
 			<View className='index'>
 				{
@@ -17,7 +17,7 @@ export default class OrderList extends Component {
 						:
 						orderArr.map((order) => {
 							if (order.id)
-								return <OrderItem key={order.id} {...order} />
+								return <OrderItem key={order.id} {...order} role={role} />
 						})
 				}
 			</View>

@@ -59,17 +59,17 @@ const service = {
 	},
 
 	//获取用户当前订单
-	getCurOrder(info) {
+	getCurUserOrder(info) {
 		return httpService.get({
 			url: `${apiConfig.baseUrl}/v1/order/user`,
 			data: JSON.stringify(info)
 		})
 	},
 
-	//获取所有的TAG(测试使用)
-	getAllTAG() {
+	getCurMTOrder(info){
 		return httpService.get({
-			url: `${apiConfig.baseUrl}/v1/tag/sort`
+			url: `${apiConfig.baseUrl}/v1/order/repairer`,
+			data: JSON.stringify(info)
 		})
 	},
 

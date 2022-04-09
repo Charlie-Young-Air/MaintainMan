@@ -3,20 +3,44 @@ import { View, Text, Picker, Button } from '@tarojs/components'
 import { AtInput, AtForm, AtImagePicker, AtList, AtListItem, AtMessage } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import service from '../../services/index'
+import tagAPI from '../../api/TAG/index'
 
 export default class Index extends Component {
 
   state = {
     contact_name: '',
     contact_phone: '',
-    title: '',
-    content: '',
-    addressArr: ['教学楼A', '教学楼B', '教学楼C'],
-    addressChecked: ''
+    title: '',                  //订单简述
+    detailedAddress: '',        //详细地址
+    TAGs: [],                   //向后端发送的tags
+    content: '',                //额外内容
+    addressArr: [],             //展示给用户的所有地址
+    tagArr: [],                 //后端返回的所有TAG
+    addressChecked: '',         //用户选中的地址，向后端传参 'address': addressChecked + detailedAddress
+
+  }
+
+  //请求后端，获取TAGs
+  componentDidMount() {
+    const { addressArr } = this.state
+    let newAddArr = addressArr
+    service.getTAG('楼名').then(res => {
+      if (res.status && res.data) {
+        res.data.sort(tagAPI.sortBy('id', 1)).map((tag) => {
+          newAddArr = [...newAddArr, tag.name]
+        })
+        this.setState({
+          addressArr: newAddArr,
+          tagArr: res.data,
+          addressChecked: res.data.sort(tagAPI.sortBy('id', 1))[0].name,
+          TAGs: [1]
+        })
+      }
+    })
   }
 
   handleSubmit = () => {
-    const { contact_name, contact_phone, title, addressChecked, content } = this.state
+    const { contact_name, contact_phone, title, addressChecked, content, detailedAddress, TAGs } = this.state
     if (!contact_name || !contact_phone || !title || !addressChecked) {
       Taro.atMessage({
         'message': '请填写所有的必填项',
@@ -27,22 +51,20 @@ export default class Index extends Component {
         'title': title,
         'contact_name': contact_name,
         'contact_phone': contact_phone,
-        'address': addressChecked,
-        'content': content
+        'address': addressChecked + detailedAddress,
+        'tags': TAGs,
+        'content': content,
       }
       service.createOrder(data).then(res => {
         console.log(res)
         if (res.code === 201) {
           console.log('创建订单成功')
-          Taro.navigateTo({ url: `/pages/order_pending/index` })
+          Taro.switchTab({ url: `/pages/order/index` })
         }
       })
     }
   }
 
-  handleTAG = () => {
-
-  }
 
   saveFormData = (dataType) => {
     return (event) => {
@@ -51,17 +73,17 @@ export default class Index extends Component {
   }
 
   chooseAddress = (e) => {
-    this.setState({ addressChecked: this.state.addressArr[e.detail.value] })
+    this.setState({ addressChecked: this.state.addressArr[e.detail.value], TAGs: [Number(e.detail.value) + 1] })
   }
 
   render() {
-    const { addressArr, contact_name, contact_phone, content, addressChecked, title } = this.state
+    const { addressArr, contact_name, contact_phone, content, addressChecked, title, detailedAddress } = this.state
     return (
       <View className='index'>
         <AtMessage />
         <AtForm onSubmit={this.handleSubmit}>
           <AtInput
-            required={true}
+            required
             name='title'
             title='报修信息'
             type='text'
@@ -70,7 +92,7 @@ export default class Index extends Component {
             onChange={this.saveFormData('title')}
           />
           <AtInput
-            required={true}
+            required
             name='contact_phone'
             title='联系电话'
             type='phone'
@@ -79,7 +101,7 @@ export default class Index extends Component {
             onChange={this.saveFormData('contact_phone')}
           />
           <AtInput
-            required={true}
+            required
             name='contact_name'
             title='联系人'
             type='text'
@@ -87,20 +109,28 @@ export default class Index extends Component {
             value={contact_name}
             onChange={this.saveFormData('contact_name')}
           />
-          <Picker mode='selector' range={addressArr} onChange={this.chooseAddress} onClick={this.handleTAG}>
-            <AtList>
-              <AtListItem
-                title='报修地址'
-                extraText={addressChecked}
+          <View className='at-row at-row__align--end'>
+            <View className='at-col at-col-5'>
+              <Picker mode='selector' range={addressArr} onChange={this.chooseAddress}>
+                <AtList>
+                  <AtListItem
+                    title='地址'
+                    extraText={addressChecked}
+                  />
+                </AtList>
+              </Picker>
+            </View>
+            <View className='at-col at-col-7'>
+              <AtInput
+                required
+                name='detailedAddress'
+                title='详细地址'
+                placeholder='如：427'
+                value={detailedAddress}
+                onChange={this.saveFormData('detailedAddress')}
               />
-            </AtList>
-          </Picker>
-          <AtInput
-            name='content'
-            title='详细信息'
-            value={content}
-            onChange={this.saveFormData('content')}
-          />
+            </View>
+          </View>
           <AtImagePicker
             multiple
           />

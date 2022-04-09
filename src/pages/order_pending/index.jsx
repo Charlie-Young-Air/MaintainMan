@@ -1,48 +1,90 @@
 import { Component } from 'react'
-import { View, Text } from '@tarojs/components'
+import { View, Text, Picker } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { AtTag } from 'taro-ui'
+import { AtTag, AtList, AtListItem } from 'taro-ui'
 import OrderList from '../../components/order/OrderList'
-import TAGList from '../../components/TAG/TAGList'
 import service from '../../services/index'
+import tagAPI from '../../api/TAG/index'
 
 export default class Index extends Component {
   state = {
     orderArr: [],
-    tagArr: [
-      { id: 1, name: '教学楼A' },
-      { id: 2, name: '教学楼B' },
-      { id: 3, name: '教学楼C' },
-      { id: 4, name: '1舍' },
-      { id: 5, name: '2舍' },
-      { id: 6, name: '3舍' },
-    ],
+    tagAll: [],             //从后端获取的所有TAGs
+    pickArr: ['全部'],      //Picker中向用户展示的TAGs
+    tagChecked: '全部',
+    role: ''
   }
 
   componentDidShow() {
-    let data = {
-      status: 0
+    this.setState({ role: Taro.getStorageSync('role') })
+    const { role } = this.state
+    if (role === 'user') {
+      let data = {
+        'status': '1'
+      }
+      //获取当前用户的所有待处理订单
+      service.getCurUserOrder(data).then(res => {
+        if (res.code === 200 && res.data) {
+          this.setState({ orderArr: res.data })
+        }
+      })
+    } else if (role === 'maintainer') {
+      let data = {
+        'status': '1',
+        'current': true
+      }
+      //获取当前维修工的所有待处理订单
+      service.getCurMTOrder(data).then(res => {
+        if (res.code === 200 && res.data) {
+          this.setState({ orderArr: res.data })
+        }
+      })
     }
-    service.getCurOrder(data).then(res => {
-      if (res.code === 200 && res.data) {
-        console.log(res.data)
-        this.setState({ orderArr: res.data })
+
+    service.getTAG('楼名').then(res => {
+      if (res.status && res.data) {
+        let nameArr = this.state.pickArr
+        const sortArr = res.data.sort(tagAPI.sortBy('id', 1))
+        sortArr.map((obj) => {
+          nameArr = [...nameArr, obj.name]
+        })
+        this.setState({ tagAll: sortArr, pickArr: nameArr })
       }
     })
-    service.getTAG().then(res => {
-      console.log(res)
-      if (res.code === 200 && res.data) {
-        this.setState({ TAG: res.data })
-      }
+  }
+
+  chooseTag = (e) => {
+    let data = {
+      'current': true,
+      'status': '1',
+      'tags': [Number(e.detail.value)],
+      'conjunctve': true
+    }
+    service.getCurMTOrder(data).then(res => {
+      this.setState({
+        tagChecked: this.state.pickArr[e.detail.value],
+        orderArr: res.data
+      })
     })
   }
 
   render() {
-    const { orderArr, tagArr } = this.state
+    const { orderArr, pickArr, tagChecked, role } = this.state
     return (
       <View className='index'>
-        <TAGList className='at-row' tagArr={tagArr} />
-        <OrderList orderArr={orderArr} />
+        {
+          role === 'maintainer' ?
+            <Picker mode='selector' range={pickArr} onChange={this.chooseTag}>
+              <AtList>
+                <AtListItem
+                  title='点击筛选'
+                  extraText={tagChecked}
+                />
+              </AtList>
+            </Picker> :
+            <View></View>
+        }
+        <OrderList orderArr={orderArr} role={role} />
       </View>
     )
   }

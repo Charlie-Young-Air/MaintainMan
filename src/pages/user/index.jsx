@@ -58,13 +58,14 @@ export default class Index extends Component {
         if (res.code) {
           //发起网络请求
           service.wxLogin(res.code).then(loginRes => {
+            console.log(loginRes)
             if (loginRes.code === 200) {
               Taro.setStorageSync('token', loginRes.data)
               const timer = setInterval(() => {
                 service.ticket().then(res => {
                   Taro.setStorageSync('token', res.data)
                 })
-              }, 1200000)
+              }, 1000000)
               Taro.setStorageSync('timer', timer)
               //请求用户信息
               service.getUserInfo().then(userInfo => {

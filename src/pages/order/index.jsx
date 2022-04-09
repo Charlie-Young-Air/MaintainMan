@@ -17,24 +17,9 @@ export default class Index extends Component {
 
   componentDidMount() {
     Taro.hideTabBar()
-    const token = Taro.getStorageSync('token')
-    //若用户已经登录（用于用户退出小程序，之后再次进入）
-    if (token) {
-      Taro.showTabBar()
-      this.setState({ isLogin: true })
-    } else {
-      //否则，开启消息订阅，接收用户的登录情况
-      this.receiver = PubSub.subscribe('Login', (_, stateObj) => {
-        this.setState(stateObj)
-      })
-    }
-  }
-
-  componentWillUnmount() {
-    PubSub.unsubscribe(this.receiver)
-  }
-
-  wxLogin = () => {
+    this.receiver = PubSub.subscribe('Login', (_, stateObj) => {
+      this.setState(stateObj)
+    })
     Taro.login({
       success: (res) => {
         console.log(res.code)
@@ -51,7 +36,7 @@ export default class Index extends Component {
                   service.ticket().then(res => {
                     Taro.setStorageSync('token', res.data)
                   })
-                }, 1200000)
+                }, 1000000)
                 Taro.setStorageSync('timer', timer)
 
                 service.getUserInfo().then(userInfo => {
@@ -76,6 +61,11 @@ export default class Index extends Component {
     })
   }
 
+  componentWillUnmount() {
+    PubSub.unsubscribe(this.receiver)
+  }
+
+
 
   render() {
     const { isLogin, openToast, toastInfo } = this.state
@@ -87,7 +77,6 @@ export default class Index extends Component {
             :
             <View>
               <AtToast isOpened={openToast} text={toastInfo} />
-              <AtButton onClick={this.wxLogin}>微信一键登录</AtButton>
             </View>
         }
       </View>
