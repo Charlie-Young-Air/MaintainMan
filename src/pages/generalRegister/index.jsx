@@ -5,6 +5,10 @@ import { AtForm, AtInput, AtMessage, AtToast } from 'taro-ui'
 import service from '../../services/index'
 import './index.scss'
 
+/**
+ * 普通登录界面，暂时弃用
+ */
+
 export default class Index extends Component {
 
 	state = {

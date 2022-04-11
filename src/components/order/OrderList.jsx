@@ -3,6 +3,10 @@ import { View, Text } from '@tarojs/components'
 import OrderItem from './OrderItem'
 import './index.scss'
 
+/**
+ *  各种订单列表内容模板，目前在 /pages/order_pending/index 中被使用
+ */
+
 export default class OrderList extends Component {
 
 	render() {

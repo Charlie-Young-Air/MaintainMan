@@ -4,11 +4,15 @@ import { AtList, AtListItem, AtToast } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
+/**
+ * 这是订单主界面组件，在 /pages/order/index 中被引用
+ */
+
 export default class OrderMain extends Component {
 
 	state = {
-		openToast: false,
-		toastInfo: ''
+		openToast: false,              //是否开启提示框
+		toastInfo: ''                  //提示框内容
 	}
 
 	pageNavigate(pageSeq) {

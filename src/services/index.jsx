@@ -66,6 +66,7 @@ const service = {
 		})
 	},
 
+	//获取维修工的订单
 	getCurMTOrder(info){
 		return httpService.get({
 			url: `${apiConfig.baseUrl}/v1/order/repairer`,
@@ -77,6 +78,14 @@ const service = {
 	getTAG(category) {
 		return httpService.get({
 			url: `${apiConfig.baseUrl}/v1/tag/sort/${category}`
+		})
+	},
+
+	//上传图片
+	uploadImage(images){
+		return httpService.post({
+			url:`${apiConfig.baseUrl}/image`,
+			data: JSON.stringify(images)
 		})
 	}
 

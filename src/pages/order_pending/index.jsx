@@ -30,11 +30,11 @@ export default class Index extends Component {
       })
     } else if (role === 'maintainer') {
       let data = {
-        'status': '1',
-        'current': true
+        'status': '1'
       }
       //获取当前维修工的所有待处理订单
       service.getCurMTOrder(data).then(res => {
+        console.log(res)
         if (res.code === 200 && res.data) {
           this.setState({ orderArr: res.data })
         }
@@ -84,7 +84,7 @@ export default class Index extends Component {
             </Picker> :
             <View></View>
         }
-        <OrderList orderArr={orderArr} role={role} />
+        <OrderList orderArr={orderArr} />
       </View>
     )
   }

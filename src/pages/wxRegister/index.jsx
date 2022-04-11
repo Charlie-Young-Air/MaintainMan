@@ -91,6 +91,9 @@ export default class Index extends Component {
 							'type': 'error',
 						})
 						break
+					case 403:
+						console.log(registerRes)
+						break
 				}
 			})
 		}

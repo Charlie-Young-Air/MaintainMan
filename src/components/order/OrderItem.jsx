@@ -1,12 +1,11 @@
 import { Component } from 'react'
 import { View } from '@tarojs/components'
-import { AtAccordion, AtList, AtListItem, AtTag } from 'taro-ui'
-import TAGList from '../../components/TAG/TAGList'
+import { AtAccordion, AtList, AtListItem } from 'taro-ui'
 import './index.scss'
 
 export default class OrderItem extends Component {
 	state = {
-		isOpen: false,
+		isOpen: false,                    //taro ui 组件 “手风琴” 列表是否展开
 		note: '点击展开',
 	}
 
@@ -19,11 +18,10 @@ export default class OrderItem extends Component {
 	}
 
 	render() {
-		const { title, address, contact_name, contact_phone, content, role } = this.props
+		const { title, address, contact_name, contact_phone, content } = this.props
 		const { isOpen, note } = this.state
 		return (
 			<View className='index'>
-				<View>{role}</View>
 				<AtAccordion
 					isAnimation={true}
 					open={isOpen}

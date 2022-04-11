@@ -1,9 +1,8 @@
 import Taro from '@tarojs/taro'
-import service from '../../services/index'
 
 const userAPI = {
 
-
+	//暂时废弃
 	pageNavigate(pageSeq) {
 		return () => {
 			switch (pageSeq) {

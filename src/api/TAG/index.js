@@ -1,5 +1,6 @@
 
 const tagAPI = {
+	//对获取到的tag进行排序
 	sortBy(attr, rev) {
 		if (rev == undefined) { rev = 1 } else { (rev) ? 1 : -1; }
 		return (a, b) => {

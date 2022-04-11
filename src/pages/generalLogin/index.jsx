@@ -6,6 +6,10 @@ import PubSub from 'pubsub-js'
 import service from '../../services'
 import './index.scss'
 
+/**
+ * 普通注册界面，暂时启用
+ */
+
 export default class Index extends Component {
 
 	state = {

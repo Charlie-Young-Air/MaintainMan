@@ -3,6 +3,10 @@ import { View, Text } from '@tarojs/components'
 import TAGItem from './TAGItem'
 import './index.scss'
 
+/**
+ * tags列表，暂时弃用
+ */
+
 export default class TAGList extends Component {
 
 	render() {

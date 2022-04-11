@@ -6,6 +6,10 @@ import PubSub from 'pubsub-js'
 import userAPI from '../../api/user'
 import './index.scss'
 
+/**
+ * 原定小程序主界面，现暂时弃用
+ * */ 
+
 export default class Index extends Component {
 
 	render() {

@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import { View, Button } from '@tarojs/components'
 import { AtButton, AtToast } from 'taro-ui'
-import Taro from '@tarojs/taro'
+import Taro, { login } from '@tarojs/taro'
 import PubSub from 'pubsub-js'
 import service from '../../services/index'
 import OrderMain from '../../components/order/OrderMain'
@@ -10,62 +10,75 @@ import './index.scss'
 export default class Index extends Component {
 
   state = {
-    isLogin: false,
-    openToast: false,
-    toastInfo: ''
+    isLogin: false,             //是否已经登录，主要用于页面展示判断
+    openToast: false,           //是否显示提示框
+    toastInfo: ''               //提示框内容
   }
 
   componentDidMount() {
-    Taro.hideTabBar()
+    Taro.hideTabBar()        //隐藏底部导航栏，用户登录成功后展示
+
+    //基于PubSub的组件间通信，监听以Login为标题的信息，并setState
     this.receiver = PubSub.subscribe('Login', (_, stateObj) => {
       this.setState(stateObj)
     })
-    Taro.login({
-      success: (res) => {
-        console.log(res.code)
-        if (res.code) {
-          //发起网络请求
-          service.wxLogin(res.code).then(loginRes => {
-            switch (loginRes.code) {
-              //若登录成功，保存token，并设置token请求器(每20s请求刷新一次token)
-              case 200:
-                Taro.setStorageSync('token', loginRes.data)
-                this.setState({ isLogin: true })
-                Taro.showTabBar({ animation: true })
-                const timer = setInterval(() => {
-                  service.ticket().then(res => {
-                    Taro.setStorageSync('token', res.data)
+    //如果用户token存在，则直接登录，否则重新向后端发起登录请求
+    const token = Taro.getStorageSync('token')
+    if (!token)
+      Taro.login({
+        success: (res) => {
+          if (res.code) {
+            //发起网络请求
+            service.wxLogin(res.code).then(loginRes => {
+              switch (loginRes.code) {
+                //若登录成功，保存token，并设置token请求器(每20s请求刷新一次token)
+                case 200:
+                  Taro.setStorageSync('token', loginRes.data)
+                  this.setState({ isLogin: true })
+                  Taro.showTabBar({ animation: true })
+                  const timer = setInterval(() => {
+                    service.ticket().then(res => {
+                      Taro.setStorageSync('token', res.data)
+                    })
+                  }, 1000000)
+                  Taro.setStorageSync('timer', timer)
+                  //请求后端，获取用户信息，存储userInfo.data.user_role
+                  service.getUserInfo().then(userInfo => {
+                    if (userInfo.code === 200)
+                      Taro.setStorageSync('role', userInfo.data.user_role)
                   })
-                }, 1000000)
-                Taro.setStorageSync('timer', timer)
-
-                service.getUserInfo().then(userInfo => {
-                  if (userInfo.code === 200)
-                    Taro.setStorageSync('role', userInfo.data.user_role)
-                })
-                break;
-              //若用户第一次登录该小程序，则跳转到注册界面
-              case 403:
-                Taro.login({
-                  success: (res) => {
-                    this.setState({ openToast: true, toastInfo: loginRes.data })
-                    setTimeout(() => {
-                      Taro.navigateTo({ url: `/pages/wxRegister/index?wxCode=${res.code}` })
-                    }, 500)
-                  }
-                })
-            }
-          })
+                  break;
+                //若用户第一次登录该小程序，则跳转到注册界面
+                case 403:
+                  Taro.login({
+                    success: (res) => {
+                      this.setState({ openToast: true, toastInfo: loginRes.data })
+                      setTimeout(() => {
+                        Taro.navigateTo({ url: `/pages/wxRegister/index?wxCode=${res.code}` })
+                      }, 500)
+                    }
+                  })
+              }
+            })
+          }
         }
-      }
-    })
+      })
+    else {
+      this.setState({ isLogin: true })
+      Taro.showTabBar({ animation: true })
+      const timer = setInterval(() => {
+        service.ticket().then(res => {
+          Taro.setStorageSync('token', res.data)
+        })
+      }, 1000000)
+      Taro.setStorageSync('timer', timer)
+    }
   }
 
   componentWillUnmount() {
     PubSub.unsubscribe(this.receiver)
+    Taro.clearStorageSync()
   }
-
-
 
   render() {
     const { isLogin, openToast, toastInfo } = this.state
