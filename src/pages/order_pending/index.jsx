@@ -25,7 +25,7 @@ export default class Index extends Component {
       //获取当前用户的所有待处理订单
       service.getCurUserOrder(data).then(res => {
         if (res.code === 200 && res.data) {
-          this.setState({ orderArr: res.data })
+          this.setState({ orderArr: res.data.entries })
         }
       })
     } else if (role === 'maintainer') {
@@ -36,7 +36,7 @@ export default class Index extends Component {
       service.getCurMTOrder(data).then(res => {
         console.log(res)
         if (res.code === 200 && res.data) {
-          this.setState({ orderArr: res.data })
+          this.setState({ orderArr: res.data.entries })
         }
       })
     }

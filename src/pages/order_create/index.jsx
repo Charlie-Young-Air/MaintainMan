@@ -17,8 +17,9 @@ export default class Index extends Component {
     content: '',                //额外内容
     addressArr: [],             //展示给用户的所有地址
     tagArr: [],                 //后端返回的所有tags
-    addressChecked: '',         //用户选中的地址tag， 【向后端传参的形式是 'address': addressChecked + detailedAddress】
-    images: []
+    addressChecked: '',         //用户选中的地址tag，【向后端传参的形式是 'address': addressChecked + detailedAddress】
+    images: [],
+    imageID: []
   }
 
   //请求后端，获取TAGs，此处获取的是 ‘楼名’
@@ -26,7 +27,6 @@ export default class Index extends Component {
     const { addressArr } = this.state
     let newAddArr = addressArr
     service.getTAG('楼名').then(res => {
-      console.log(res)
       if (res.status && res.data) {
         res.data.sort(tagAPI.sortBy('id', 1)).map((tag) => {
           newAddArr = [...newAddArr, tag.name]
@@ -41,8 +41,9 @@ export default class Index extends Component {
     })
   }
 
+  //订单提交
   handleSubmit = () => {
-    const { contact_name, contact_phone, title, addressChecked, content, detailedAddress, TAGs, images } = this.state
+    const { contact_name, contact_phone, title, addressChecked, content, detailedAddress, TAGs, imageID } = this.state
     if (!contact_name || !contact_phone || !title) {
       Taro.atMessage({
         'message': '请填写所有的必填项',
@@ -56,12 +57,11 @@ export default class Index extends Component {
         'contact_phone': contact_phone,
         'address': addressChecked + detailedAddress,
         'tags': TAGs,
-        'content': content,
+        'content': content + ' ' + imageID
       }
       service.createOrder(data).then(res => {
         console.log(res)
         if (res.code === 201) {
-          console.log('创建订单成功')
           Taro.switchTab({ url: `/pages/order/index` })
         }
       })
@@ -82,22 +82,27 @@ export default class Index extends Component {
 
   //选择图片
   imageChange = (image) => {
-    console.log(image)
-    // this.setState({ images: image })
-    Taro.uploadFile({
-      url: `${apiConfig.baseUrl}/image`, //仅为示例，非真实的接口地址
-      filePath: image[0].url,
-      name: 'image',
-      success (res){
-        // const data = res.data
-        console.log(res)
-      }
-    })
+    const token = Taro.getStorageSync('token')
+    this.setState({ images: image })
+    for (let i = 0; i < image.length; i++) {
+      Taro.uploadFile({
+        url: `${apiConfig.baseUrl}/v1/image`,
+        filePath: image[i].url,
+        name: 'image',
+        header: {
+          Authorization: 'Bearer ' + token
+        },
+      }).then(res => {
+        console.log(JSON.parse(res.data))
+        this.setState({ imageID: [JSON.parse(res.data).data] })
+        // console.log(this.state.imageID)
+      })
+    }
   }
 
   //点击图片展示高清大图（未完成）
   imageClick = (e) => {
-    const {images} = this.state
+    const { images } = this.state
     console.log(images[e].url)
   }
 

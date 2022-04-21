@@ -22,7 +22,7 @@ export default class Index extends Component {
     this.receiver = PubSub.subscribe('Login', (_, stateObj) => {
       this.setState(stateObj)
     })
-    //如果用户token存在，则直接登录，否则重新向后端发起登录请求
+    //如果用户token存在，则直接登录，否则重新向后端发起登录请求(此处还需要完善，解析token来判定过期时间)
     const token = Taro.getStorageSync('token')
     if (!token)
       Taro.login({
@@ -30,6 +30,7 @@ export default class Index extends Component {
           if (res.code) {
             //发起网络请求
             service.wxLogin(res.code).then(loginRes => {
+              // console.log(loginRes)
               switch (loginRes.code) {
                 //若登录成功，保存token，并设置token请求器(每20s请求刷新一次token)
                 case 200:
@@ -52,10 +53,10 @@ export default class Index extends Component {
                 case 403:
                   Taro.login({
                     success: (res) => {
-                      this.setState({ openToast: true, toastInfo: loginRes.data })
+                      this.setState({ openToast: true, toastInfo: "首次使用请先完善个人信息" })
                       setTimeout(() => {
                         Taro.navigateTo({ url: `/pages/wxRegister/index?wxCode=${res.code}` })
-                      }, 500)
+                      }, 800)
                     }
                   })
               }
@@ -66,6 +67,9 @@ export default class Index extends Component {
     else {
       this.setState({ isLogin: true })
       Taro.showTabBar({ animation: true })
+      service.ticket().then(res => {
+        Taro.setStorageSync('token', res.data)
+      })
       const timer = setInterval(() => {
         service.ticket().then(res => {
           Taro.setStorageSync('token', res.data)
@@ -77,6 +81,9 @@ export default class Index extends Component {
 
   componentWillUnmount() {
     PubSub.unsubscribe(this.receiver)
+    //关闭更新token的定时器
+    const timer = Taro.getStorageSync('timer')
+    clearInterval(timer)
     Taro.clearStorageSync()
   }
 

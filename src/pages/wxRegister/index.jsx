@@ -58,6 +58,7 @@ export default class Index extends Component {
 
 			//请求注册用户
 			service.wxRegister(data).then(registerRes => {
+				console.log(registerRes)
 				switch (registerRes.code) {
 					//若注册成功
 					case 200:

@@ -9,7 +9,8 @@ export default defineAppConfig({
     'pages/order_commented/index',
     'pages/generalLogin/index',
     'pages/generalRegister/index',
-    'pages/wxRegister/index'
+    'pages/wxRegister/index',
+    'pages/orderDetail/index'
   ],
   tabBar: {
     list: [{
