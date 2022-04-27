@@ -20,17 +20,18 @@ export default class Index extends Component {
     const { role } = this.state
     if (role === 'user') {
       let data = {
-        'status': '1'
+        'status': 1
       }
       //获取当前用户的所有待处理订单
       service.getCurUserOrder(data).then(res => {
         if (res.code === 200 && res.data) {
+          console.log(res.data.entries)
           this.setState({ orderArr: res.data.entries })
         }
       })
     } else if (role === 'maintainer') {
       let data = {
-        'status': '1'
+        'status': 1
       }
       //获取当前维修工的所有待处理订单
       service.getCurMTOrder(data).then(res => {
@@ -56,7 +57,7 @@ export default class Index extends Component {
   chooseTag = (e) => {
     let data = {
       'current': true,
-      'status': '1',
+      'status': 1,
       'tags': [Number(e.detail.value)],
       'conjunctve': true
     }

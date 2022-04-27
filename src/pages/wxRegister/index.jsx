@@ -53,7 +53,6 @@ export default class Index extends Component {
 				'display_name': nickName,
 				'phone': phone,
 				'email': email,
-				'code': wxCode
 			}
 
 			//请求注册用户

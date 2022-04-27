@@ -62,7 +62,8 @@ const service = {
 	getCurUserOrder(info) {
 		return httpService.get({
 			url: `${apiConfig.baseUrl}/v1/order/user`,
-			data: JSON.stringify(info)
+			// data: JSON.stringify(info)
+			data: info
 		})
 	},
 
@@ -70,7 +71,7 @@ const service = {
 	getCurMTOrder(info) {
 		return httpService.get({
 			url: `${apiConfig.baseUrl}/v1/order/repairer`,
-			data: JSON.stringify(info)
+			data: info
 		})
 	},
 
@@ -85,6 +86,13 @@ const service = {
 	getImage(id) {
 		return httpService.get({
 			url: `${apiConfig.baseUrl}/v1/image/${id}`
+		})
+	},
+
+	//取消订单
+	cancelOrder(id) {
+		return httpService.post({
+			url: `${apiConfig.baseUrl}/v1/order/${id}/cancel`
 		})
 	},
 

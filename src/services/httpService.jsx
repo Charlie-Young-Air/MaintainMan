@@ -1,9 +1,21 @@
 import Taro from '@tarojs/taro'
+import qs from 'qs'
 
 //网络请求拦截器
 const interceptor = (chain) => {
 	const requestParams = chain.requestParams
 	const { method, data, url } = requestParams
+
+	//GET请求传参（字符串拼接。。。）
+	// console.log(`http ${method || 'GET'} --> ${url} data: `, data)
+	if (method === 'GET') {
+		if (data) {
+			requestParams.url = requestParams.url + '?' + qs.stringify(requestParams.data, { indices: false });
+			console.log(requestParams.url)
+			requestParams.data = undefined;
+		}
+	}
+
 	//添加token
 	try {
 		const token = Taro.getStorageSync('token')
@@ -44,7 +56,8 @@ export default {
 				...options.header
 			},
 			success: function (res) {
-				// console.log(res.data)
+				Taro.setStorageSync('statusCode', res.statusCode)
+				// console.log(res.statusCode)
 			}
 		})
 	},

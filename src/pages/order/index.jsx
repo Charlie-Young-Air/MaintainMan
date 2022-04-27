@@ -30,35 +30,27 @@ export default class Index extends Component {
           if (res.code) {
             //发起网络请求
             service.wxLogin(res.code).then(loginRes => {
-              // console.log(loginRes)
-              switch (loginRes.code) {
-                //若登录成功，保存token，并设置token请求器(每20s请求刷新一次token)
-                case 200:
-                  Taro.setStorageSync('token', loginRes.data)
-                  this.setState({ isLogin: true })
-                  Taro.showTabBar({ animation: true })
-                  const timer = setInterval(() => {
-                    service.ticket().then(res => {
-                      Taro.setStorageSync('token', res.data)
-                    })
-                  }, 1000000)
-                  Taro.setStorageSync('timer', timer)
-                  //请求后端，获取用户信息，存储userInfo.data.user_role
-                  service.getUserInfo().then(userInfo => {
-                    if (userInfo.code === 200)
-                      Taro.setStorageSync('role', userInfo.data.user_role)
+              if (loginRes.status === false) {
+                Taro.setStorageSync('token', loginRes.data)
+                this.setState({ openToast: true, toastInfo: "首次使用请先完善个人信息" })
+                setTimeout(() => {
+                  Taro.navigateTo({ url: `/pages/wxRegister/index?wxCode=${res.code}` })
+                }, 800)
+              } else {
+                Taro.setStorageSync('token', loginRes.data)
+                this.setState({ isLogin: true })
+                Taro.showTabBar({ animation: true })
+                const timer = setInterval(() => {
+                  service.ticket().then(res => {
+                    Taro.setStorageSync('token', res.data)
                   })
-                  break;
-                //若用户第一次登录该小程序，则跳转到注册界面
-                case 403:
-                  Taro.login({
-                    success: (res) => {
-                      this.setState({ openToast: true, toastInfo: "首次使用请先完善个人信息" })
-                      setTimeout(() => {
-                        Taro.navigateTo({ url: `/pages/wxRegister/index?wxCode=${res.code}` })
-                      }, 800)
-                    }
-                  })
+                }, 1000000)
+                Taro.setStorageSync('timer', timer)
+                //请求后端，获取用户信息，存储userInfo.data.user_role
+                service.getUserInfo().then(userInfo => {
+                  if (userInfo.code === 200)
+                    Taro.setStorageSync('role', userInfo.data.user_role)
+                })
               }
             })
           }

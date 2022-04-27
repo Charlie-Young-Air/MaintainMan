@@ -1,5 +1,6 @@
 import { Component } from 'react'
 import { View, Text } from '@tarojs/components'
+import { AtDivider } from 'taro-ui'
 import OrderItem from './OrderItem'
 import './index.scss'
 
@@ -8,21 +9,25 @@ import './index.scss'
  */
 
 export default class OrderList extends Component {
-
 	render() {
-		const { orderArr, role } = this.props
+		const { orderArr } = this.props
 		return (
 			<View className='index'>
 				{
-					orderArr.length === 0 ?
+					orderArr === null || orderArr.length === 0 ?
 						<View>
-							<Text>当前无待处理订单</Text>
+							<AtDivider content='没有更多了' fontColor='#ed3f14' lineColor='#ed3f14' />
 						</View>
 						:
-						orderArr.map((order) => {
-							if (order.id)
-								return <OrderItem key={order.id} {...order} role={role} />
-						})
+						<View>
+							{
+								orderArr.map((order) => {
+									if (order.id)
+										return <OrderItem key={order.id} {...order} />
+								})
+							}
+						</View>
+
 				}
 			</View>
 		)
